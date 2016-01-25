@@ -27,30 +27,33 @@ function stripSignatureFromPath(path) {
     var ix = path.indexOf('&sig=');
     return path.slice(0, ix);
 }
+
 describe('d3media-um-lib', function () {
-    describe('#email(input) returned URL', function () {
+    describe('#email(input)', function () {
         var email = ' a@BC.de ',
             now = unixTS(),
             apiURL = api.email(email),
             parsed = url.parse(apiURL, true),
             trimmedLoweredAndHashedEmail = hashAndEncode(email.trim().toLowerCase());
-        it('should include a valid timestamp', function () {
-            assert(parsed.query.ts <= now);
-            assert(parsed.query.ts + 10 > now);
-        });
-        describe('"e" parameter', function () {
-            it('should include a properly formatted and hashed email', function () {
-                assert.deepEqual(parsed.query.e, trimmedLoweredAndHashedEmail);
+        describe('returned URL', function () {
+            it('should include a valid timestamp', function () {
+                assert(parsed.query.ts <= now);
+                assert(parsed.query.ts + 10 > now);
             });
-        });
-        it('URL action and params should be signed', function () {
-            var urlWithNoSignature = stripSignatureFromPath(apiURL);
-            assert.deepEqual(sign(urlWithNoSignature), parsed.query.sig);
+            describe('email ("e") parameter', function () {
+                it('should include a properly formatted and hashed email', function () {
+                    assert.deepEqual(parsed.query.e, trimmedLoweredAndHashedEmail);
+                });
+            });
+            it('URL action and params should be signed', function () {
+                var urlWithNoSignature = stripSignatureFromPath(apiURL);
+                assert.deepEqual(sign(urlWithNoSignature), parsed.query.sig);
 
-        });
-        describe('pathname', function () {
-            it('should be /t', function () {
-                assert.deepEqual(parsed.pathname, '/t');
+            });
+            describe('pathname', function () {
+                it('should be /t', function () {
+                    assert.deepEqual(parsed.pathname, '/t');
+                });
             });
         });
     });
