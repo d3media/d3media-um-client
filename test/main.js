@@ -1,10 +1,10 @@
 'use strict';
-var assert = require('assert');
-var secret = 'abc';
-var api = require('..')(secret);
-var base64url = require('base64-url');
-var crypto = require('crypto');
-var url = require('url');
+var assert = require('assert'),
+    secret = 'abc',
+    api = require('..')(secret),
+    base64url = require('base64-url'),
+    crypto = require('crypto'),
+    url = require('url');
 
 function sign(input) {
     var hash = crypto.createHmac('sha256', secret).update(input).digest('base64');
@@ -12,9 +12,9 @@ function sign(input) {
 }
 
 function hashAndEncode(input) {
-    var algo = 'SHA256';
-    var format = 'base64';
-    var hash = crypto.createHash(algo);
+    var algo = 'SHA256',
+        format = 'base64',
+        hash = crypto.createHash(algo);
     hash.update(input);
     return base64url.escape(hash.digest(format));
 }
@@ -29,22 +29,29 @@ function stripSignatureFromPath(path) {
 }
 describe('d3media-um-lib', function () {
     describe('#email(input) returned URL', function () {
-        var email = ' a@BC.de ';
-        var now = unixTS();
-        var apiURL = api.email(email);
-        var parsed = url.parse(apiURL, true);
-        var expected = hashAndEncode(email.trim().toLowerCase());
+        var email = ' a@BC.de ',
+            now = unixTS(),
+            apiURL = api.email(email),
+            parsed = url.parse(apiURL, true),
+            trimmedLoweredAndHashedEmail = hashAndEncode(email.trim().toLowerCase());
         it('should include a valid timestamp', function () {
             assert(parsed.query.ts <= now);
             assert(parsed.query.ts + 10 > now);
         });
-        it('should include a properly formatted and hashed email', function () {
-            assert.deepEqual(parsed.query.e, expected);
+        describe('"e" parameter', function () {
+            it('should include a properly formatted and hashed email', function () {
+                assert.deepEqual(parsed.query.e, trimmedLoweredAndHashedEmail);
+            });
         });
         it('URL action and params should be signed', function () {
             var urlWithNoSignature = stripSignatureFromPath(apiURL);
             assert.deepEqual(sign(urlWithNoSignature), parsed.query.sig);
 
+        });
+        describe('pathname', function () {
+            it('should be /t', function () {
+                assert.deepEqual(parsed.pathname, '/t');
+            });
         });
     });
 });
