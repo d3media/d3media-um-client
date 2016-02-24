@@ -13,7 +13,10 @@ function createHasher(version) {
         }
         hash = crypto.createHash(algo);
         hash.update(input);
-        return hash.digest(format);
+        if (format === 'base64url') {
+            return hash.digest('base64');
+        }
+        throw new Error('format ' + format + ' not supported');
 
     };
 }

@@ -7,7 +7,12 @@ var definitions = require('d3media-um-definitions').definitions,
     base64Escape = base64url.escape;
 
 function sign(algo, format, secret, input) {
-    return base64Escape(crypto.createHmac(algo, secret).update(input).digest(format));
+    var result;
+    if (format === 'base64url') {
+        result = crypto.createHmac(algo, secret).update(input).digest('base64');
+        return base64Escape(result);
+    }
+    throw new Error('format ' + format + ' not supported');
 }
 
 exports = module.exports = function (secret) {
